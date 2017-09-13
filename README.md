@@ -1,6 +1,6 @@
 # AMPFloatingTextField
 
-UITextField with Floating Top Title Lable  and Bottom Error Label.
+UITextField with Floating Top Title Label  and Bottom Error Label.
 
 Version: 1.0
 
