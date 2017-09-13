@@ -1,0 +1,11 @@
+use_frameworks!
+
+target 'AMPFloatingTextField_Example' do
+  pod 'AMPFloatingTextField', :path => '../'
+
+  target 'AMPFloatingTextField_Tests' do
+    inherit! :search_paths
+
+    
+  end
+end
