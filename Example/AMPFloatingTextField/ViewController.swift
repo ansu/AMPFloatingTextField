@@ -38,6 +38,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
             comment: "title for Email field"
         )
         self.view.addSubview(emailField)
+        applySkyscannerTheme(textField: emailField)
         // Do any additional setup after loading the view, typically from a nib.
     }
 
@@ -52,7 +53,9 @@ class ViewController: UIViewController, UITextFieldDelegate {
         
         textField.textColor = darkGreyColor
         textField.lineColor = UIColor.red
-        textField.layer.borderColor = darkGreyColor.cgColor
+        textField.activeBorderColor = UIColor.white
+        textField.activeBackgroundColor = UIColor.purple
+        
         textField.placeholderColor = UIColor.white
         
         textField.selectedTitleColor = darkGreyColor

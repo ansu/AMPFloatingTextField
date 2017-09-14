@@ -17,12 +17,10 @@ open class AMPFloatingTextField: UITextField { // swiftlint:disable:this type_bo
    
    
     var  counter = 0
-    
-    
-    
+
     fileprivate func updateTextAligment() {
-            textAlignment = .right
-            titleLabel.textAlignment = .right
+            textAlignment = .left
+            titleLabel.textAlignment = .left
     }
     
     // MARK: Animation timing
@@ -35,6 +33,46 @@ open class AMPFloatingTextField: UITextField { // swiftlint:disable:this type_bo
     // MARK: Colors
     
     fileprivate var cachedTextColor: UIColor?
+    private let borderLayer = CALayer()
+    // This property applies a thickness to the border of the control. The default value for this property is 2 points.
+    @IBInspectable open var borderSize: CGFloat = 2.0 {
+        didSet {
+            updateBorder()
+        }
+    }
+    
+    // The color of the border when it has content. By default, there will be no color
+    @IBInspectable dynamic open var activeBorderColor: UIColor = .clear {
+        didSet {
+            updateBorder()
+            updateBackground()
+            //updatePlaceholder()
+        }
+    }
+    
+    
+    // The color of the border when it has no content. By default, there will be no color
+    @IBInspectable dynamic open var inactiveBorderColor: UIColor = .clear {
+        didSet {
+            updateBorder()
+            updateBackground()
+//            updatePlaceholder()
+        }
+    }
+    
+    // The color of the input's background when it has content. When it's not focused it reverts to the color of the `inactiveBorderColor`.
+    @IBInspectable dynamic open var activeBackgroundColor: UIColor = .clear {
+        didSet {
+            updateBackground()
+        }
+    }
+    
+    // The scale of the placeholder font. This property determines the size of the placeholder label relative to the font size of the text field.
+    @IBInspectable dynamic open var placeholderFontScale: CGFloat = 0.7 {
+        didSet {
+            updatePlaceholder()
+        }
+    }
     
     /// A UIColor value that determines the text color of the editable text
     @IBInspectable
@@ -56,7 +94,7 @@ open class AMPFloatingTextField: UITextField { // swiftlint:disable:this type_bo
     }
     
     /// A UIFont value that determines text color of the placeholder label
-    dynamic open var placeholderFont: UIFont? {
+    @IBInspectable dynamic open var placeholderFont: UIFont? {
         didSet {
             updatePlaceholder()
         }
@@ -72,7 +110,7 @@ open class AMPFloatingTextField: UITextField { // swiftlint:disable:this type_bo
     }
     
     /// A UIFont value that determines the text font of the title label
-    dynamic open var titleFont: UIFont = .systemFont(ofSize: 13) {
+    @IBInspectable dynamic open var titleFont: UIFont = .systemFont(ofSize: 13) {
         didSet {
             updateTitleLabel()
         }
@@ -152,6 +190,23 @@ open class AMPFloatingTextField: UITextField { // swiftlint:disable:this type_bo
      This can be the `title`, `selectedTitle` or the `errorMessage`.
      The default implementation converts the text to uppercase.
      */
+    
+    private func updateBorder() {
+        borderLayer.frame = CGRect( x: bounds.origin.x, y: titleHeight(), width: bounds.size.width,
+            height: bounds.size.height - titleHeight() * 2 - selectedLineHeight
+        )
+        borderLayer.borderWidth = borderSize
+        borderLayer.borderColor = (isFirstResponder || !(text!.isEmpty)) ? activeBorderColor.cgColor : inactiveBorderColor.cgColor
+    }
+    
+    private func updateBackground() {
+        if isFirstResponder || !(text!.isEmpty) {
+            borderLayer.backgroundColor = activeBackgroundColor.cgColor
+        } else {
+            borderLayer.backgroundColor = inactiveBorderColor.cgColor
+        }
+    }
+    
     open var titleFormatter: ((String) -> String) = { (text: String) -> String in
         return text.uppercased()
     }
@@ -274,7 +329,7 @@ open class AMPFloatingTextField: UITextField { // swiftlint:disable:this type_bo
         createLineView()
         createErrorLabel()
         createTextFieldBackgroundView()
-        
+        layer.addSublayer(borderLayer)
         updateColors()
         addEditingChangedObserver()
         updateTextAligment()
@@ -292,6 +347,8 @@ open class AMPFloatingTextField: UITextField { // swiftlint:disable:this type_bo
         _titleVisible = true
         self.placeholder = ""
         updateTitleLabel(true)
+        updateBorder()
+        updateBackground()
     }
     
     
@@ -423,6 +480,7 @@ open class AMPFloatingTextField: UITextField { // swiftlint:disable:this type_bo
         updateTitleColor()
         updateTextColor()
         updateErrorLabelColor()
+        updateBackground()
     }
     
     fileprivate func updateLineColor() {
@@ -612,8 +670,6 @@ open class AMPFloatingTextField: UITextField { // swiftlint:disable:this type_bo
             width: bounds.size.width,
             height: bounds.size.height - titleHeight() * 2 - selectedLineHeight
         )
-        
-        
         return rect
     }
     
