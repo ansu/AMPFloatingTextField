@@ -1,6 +1,11 @@
 # AMPFloatingTextField
 
-UITextField with Floating Top Title Label  and Bottom Error Label.
+We fell in love with the text inputs effects of SkyfloatingLableTextField. We got the completly different scenario in our project which we were not able to handled through that. As an exercise We decided to recreate couple of textfield features.
+
+
+Currently it handles the below scneario:
+
+![AMPFloatingTextField](https://github.com/ansu/AMPFloatingTextField/blob/master/screenshot/titlewithbottomerrorlable.png)
 
 Version: 1.0
 
