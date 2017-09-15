@@ -35,7 +35,7 @@ pod 'AMPFloatingTextField'
 
 ## Author
 
-ansujain123, ansu.jain@kuliza.com
+ansu, ansu.rajesh@gmail.com
 
 ## License
 
