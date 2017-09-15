@@ -14,9 +14,6 @@ import UIKit
 
 @IBDesignable
 open class AMPFloatingTextField: UITextField { // swiftlint:disable:this type_body_length
-   
-   
-    var  counter = 0
 
     fileprivate func updateTextAligment() {
             textAlignment = .left
@@ -24,16 +21,15 @@ open class AMPFloatingTextField: UITextField { // swiftlint:disable:this type_bo
     }
     
     // MARK: Animation timing
-    
     /// The value of the title appearing duration
     dynamic open var titleFadeInDuration: TimeInterval = 0.2
     /// The value of the title disappearing duration
     dynamic open var titleFadeOutDuration: TimeInterval = 0.3
     
     // MARK: Colors
-    
     fileprivate var cachedTextColor: UIColor?
     private let borderLayer = CALayer()
+    
     // This property applies a thickness to the border of the control. The default value for this property is 2 points.
     @IBInspectable open var borderSize: CGFloat = 2.0 {
         didSet {
@@ -46,23 +42,33 @@ open class AMPFloatingTextField: UITextField { // swiftlint:disable:this type_bo
         didSet {
             updateBorder()
             updateBackground()
-            //updatePlaceholder()
         }
     }
-    
     
     // The color of the border when it has no content. By default, there will be no color
     @IBInspectable dynamic open var inactiveBorderColor: UIColor = .clear {
         didSet {
             updateBorder()
             updateBackground()
-//            updatePlaceholder()
         }
     }
     
     // The color of the input's background when it has content. When it's not focused it reverts to the color of the `inactiveBorderColor`.
     @IBInspectable dynamic open var activeBackgroundColor: UIColor = .clear {
         didSet {
+            updateBackground()
+        }
+    }
+    
+    @IBInspectable dynamic open var inActiveBackgroundColor: UIColor = .clear {
+        didSet {
+            updateBackground()
+        }
+    }
+    
+    @IBInspectable dynamic open var errorBackGroundColor: UIColor = .clear {
+        didSet {
+            updateBorder()
             updateBackground()
         }
     }
@@ -126,7 +132,7 @@ open class AMPFloatingTextField: UITextField { // swiftlint:disable:this type_bo
     /// A UIColor value that determines the color of the bottom line when in the normal state
     @IBInspectable dynamic open var lineColor: UIColor = .lightGray {
         didSet {
-            updateLineView()
+            updateLineColor()
         }
     }
     
@@ -144,25 +150,8 @@ open class AMPFloatingTextField: UITextField { // swiftlint:disable:this type_bo
         }
     }
     
-    /// A UIColor value that determines the color of the line in a selected state
-    @IBInspectable dynamic open var selectedLineColor: UIColor = .black {
-        didSet {
-            updateLineView()
-        }
-    }
-    
-    // MARK: Line height
-    
     /// A CGFloat value that determines the height for the bottom line when the control is in the normal state
     @IBInspectable dynamic open var lineHeight: CGFloat = 0.5 {
-        didSet {
-            updateLineView()
-            setNeedsDisplay()
-        }
-    }
-    
-    /// A CGFloat value that determines the height for the bottom line when the control is in a selected state
-    @IBInspectable dynamic open var selectedLineHeight: CGFloat = 1.0 {
         didSet {
             updateLineView()
             setNeedsDisplay()
@@ -173,7 +162,6 @@ open class AMPFloatingTextField: UITextField { // swiftlint:disable:this type_bo
     
     /// The internal `UIView` to display the line below the text input.
     open var lineView: UIView!
-    
     /// The internal `UILabel` that displays the selected, deselected title or error message based on the current state.
     open var titleLabel: UILabel!
     
@@ -181,35 +169,35 @@ open class AMPFloatingTextField: UITextField { // swiftlint:disable:this type_bo
     
     // MARK: Properties
     
-    /**
-     The formatter used before displaying content in the title label.
-     This can be the `title`, `selectedTitle` or the `errorMessage`.
-     The default implementation converts the text to uppercase.
-     */
-    
+    // Update Border Layer
     private func updateBorder() {
+        
         borderLayer.frame = CGRect( x: bounds.origin.x, y: titleHeight(), width: bounds.size.width,
-            height: bounds.size.height - titleHeight() * 2 - selectedLineHeight
+                                    height: bounds.size.height - titleHeight() * 2 - lineHeight
         )
         borderLayer.borderWidth = borderSize
-        borderLayer.borderColor = (isFirstResponder || !(text!.isEmpty)) ? activeBorderColor.cgColor : inactiveBorderColor.cgColor
-    }
-    
-    private func updateBackground() {
-        if isFirstResponder || !(text!.isEmpty) {
-            borderLayer.backgroundColor = activeBackgroundColor.cgColor
+        if hasErrorMessage {
+            borderLayer.borderColor = errorBackGroundColor.cgColor
         } else {
-            borderLayer.backgroundColor = inactiveBorderColor.cgColor
+            borderLayer.borderColor = (isFirstResponder || !(text!.isEmpty)) ? activeBorderColor.cgColor : inactiveBorderColor.cgColor
         }
     }
     
-    open var titleFormatter: ((String) -> String) = { (text: String) -> String in
-        return text.uppercased()
+    // Update Border layer background color
+    private func updateBackground() {
+        
+        if hasErrorMessage {
+            borderLayer.backgroundColor = errorBackGroundColor.cgColor
+        } else {
+            if isFirstResponder || !(text!.isEmpty) {
+                borderLayer.backgroundColor = activeBackgroundColor.cgColor
+            } else {
+                borderLayer.backgroundColor = inActiveBackgroundColor.cgColor
+            }
+        }
     }
     
-    /**
-     Identifies whether the text object should hide the text being entered.
-     */
+    // Identifies whether the text object should hide the text being entered.
     override open var isSecureTextEntry: Bool {
         set {
             super.isSecureTextEntry = newValue
@@ -241,7 +229,7 @@ open class AMPFloatingTextField: UITextField { // swiftlint:disable:this type_bo
         set {
             _highlighted = newValue
             updateTitleColor()
-            updateLineView()
+            //updateLineView()
         }
     }
     
@@ -330,9 +318,6 @@ open class AMPFloatingTextField: UITextField { // swiftlint:disable:this type_bo
         updateTextAligment()
     }
     
-    
-    
-    
     fileprivate func addEditingChangedObserver() {
         self.addTarget(self, action: #selector(AMPFloatingTextField.editingChanged), for: .editingChanged)
         self.addTarget(self, action: #selector(AMPFloatingTextField.editingBegin), for: .editingDidBegin)
@@ -340,16 +325,13 @@ open class AMPFloatingTextField: UITextField { // swiftlint:disable:this type_bo
     
     open func editingBegin() {
         _titleVisible = true
+        errorMessage = ""
         self.placeholder = ""
         updateTitleLabel(true)
         updateBorder()
         updateBackground()
     }
-    
-    
-    /**
-     Invoked when the editing state of the textfield changes. Override to respond to this change.
-     */
+
     open func editingChanged() {
         updateControl(true)
         updateTitleLabel(true)
@@ -378,9 +360,6 @@ open class AMPFloatingTextField: UITextField { // swiftlint:disable:this type_bo
         self.errorLabel = titleLabel
     }
     
-    
-    
-    
     fileprivate func createLineView() {
         
         if lineView == nil {
@@ -397,7 +376,6 @@ open class AMPFloatingTextField: UITextField { // swiftlint:disable:this type_bo
     fileprivate func configureDefaultLineHeight() {
         let onePixel: CGFloat = 1.0 / UIScreen.main.scale
         lineHeight = 2.0 * onePixel
-        selectedLineHeight = 2.0 * self.lineHeight
     }
     
     // MARK: Responder handling
@@ -432,17 +410,15 @@ open class AMPFloatingTextField: UITextField { // swiftlint:disable:this type_bo
     
     fileprivate func updateControl(_ animated: Bool = false) {
         updateColors()
-        updateLineView()
-        
+        updateBorder()
         updateTitleLabel(animated)
         updateErrorLabel(animated)
     }
     
     fileprivate func updateLineView() {
         if let lineView = lineView {
-            lineView.frame = lineViewRectForBounds(bounds, editing: editingOrSelected)
+            lineView.frame = lineViewRectForBounds(bounds)
         }
-        updateLineColor()
     }
     
     // MARK: - Color updates
@@ -457,10 +433,10 @@ open class AMPFloatingTextField: UITextField { // swiftlint:disable:this type_bo
     }
     
     fileprivate func updateLineColor() {
-        if hasErrorMessage {
-            lineView.backgroundColor = errorColor
+        if hasText || !isFirstResponder {
+            lineView.backgroundColor = .clear
         } else {
-            lineView.backgroundColor = editingOrSelected ? selectedLineColor : lineColor
+            lineView.backgroundColor = lineColor
         }
     }
     
@@ -513,7 +489,7 @@ open class AMPFloatingTextField: UITextField { // swiftlint:disable:this type_bo
         
         var titleText: String? = nil
         if hasErrorMessage {
-            titleText = titleFormatter(errorMessage!)
+            titleText = errorMessage
         }
         errorLabel.text = titleText
         errorLabel.font = titleFont
@@ -601,15 +577,7 @@ open class AMPFloatingTextField: UITextField { // swiftlint:disable:this type_bo
     override open func textRect(forBounds bounds: CGRect) -> CGRect {
         let superRect = super.textRect(forBounds: bounds)
         
-        
-        let rect = CGRect(
-            x: superRect.origin.x,
-            y: titleHeight(),
-            width: superRect.size.width,
-            height: superRect.size.height - ( titleHeight() * 2 ) - selectedLineHeight
-        )
-        
-        
+        let rect = CGRect( x: superRect.origin.x, y: titleHeight(), width: superRect.size.width, height: superRect.size.height - ( titleHeight() * 2 ) - lineHeight)
         return rect
     }
     
@@ -622,11 +590,7 @@ open class AMPFloatingTextField: UITextField { // swiftlint:disable:this type_bo
         let superRect = super.editingRect(forBounds: bounds)
         let titleHeight = self.titleHeight()
         
-        let rect = CGRect(
-            x: superRect.origin.x,
-            y: titleHeight,
-            width: superRect.size.width,
-            height: superRect.size.height - titleHeight * 2 - selectedLineHeight
+        let rect = CGRect(x: superRect.origin.x, y: titleHeight, width: superRect.size.width, height: superRect.size.height - titleHeight * 2 - lineHeight
         )
         return rect
     }
@@ -637,11 +601,7 @@ open class AMPFloatingTextField: UITextField { // swiftlint:disable:this type_bo
      - returns: The rectangle that the placeholder should render in
      */
     override open func placeholderRect(forBounds bounds: CGRect) -> CGRect {
-        let rect = CGRect(
-            x: 0,
-            y: titleHeight(),
-            width: bounds.size.width,
-            height: bounds.size.height - titleHeight() * 2 - selectedLineHeight
+        let rect = CGRect(x: 0, y: titleHeight(), width: bounds.size.width, height: bounds.size.height - titleHeight() * 2 - lineHeight
         )
         return rect
     }
@@ -658,7 +618,6 @@ open class AMPFloatingTextField: UITextField { // swiftlint:disable:this type_bo
         if editing {
             return CGRect(x: 0, y: 0, width: bounds.size.width, height: titleHeight())
         }
-        
         return CGRect(x: 0, y: titleHeight(), width: bounds.size.width, height: titleHeight())
     }
     
@@ -674,7 +633,6 @@ open class AMPFloatingTextField: UITextField { // swiftlint:disable:this type_bo
         return CGRect(x: 0, y: height, width: bounds.size.width, height: titleHeight())
     }
     
-    
     /**
      Calculate the bounds for the bottom line of the control.
      Override to create a custom size bottom line in the textbox.
@@ -682,19 +640,10 @@ open class AMPFloatingTextField: UITextField { // swiftlint:disable:this type_bo
      - parameter editing: True if the control is selected or highlighted
      - returns: The rectangle that the line bar should render in
      */
-    open func lineViewRectForBounds(_ bounds: CGRect, editing: Bool) -> CGRect {
+    open func lineViewRectForBounds(_ bounds: CGRect) -> CGRect {
         
-        if editing {
-            let height = editing ? selectedLineHeight : lineHeight
-            let yPosition = bounds.size.height - titleHeight()
-            return CGRect(x: 0, y: yPosition, width: bounds.size.width, height: height)
-        }
-        
-        //return CGRect(x: 0, y: 40, width: bounds.size.width, height: titleHeight())
-        
-        //        let height = editing ? selectedLineHeight : lineHeight
-        //        return CGRect(x: 0, y: 39, width: bounds.size.width, height: height)
-        return CGRect.zero
+        let yPosition = bounds.size.height - titleHeight()
+        return CGRect(x: 0, y: yPosition, width: bounds.size.width, height: lineHeight)
     }
     
     /**
@@ -741,7 +690,7 @@ open class AMPFloatingTextField: UITextField { // swiftlint:disable:this type_bo
         
         errorLabel.frame = errorLabelRectForBounds(bounds, editing: isErrorVisible() || _renderingInInterfaceBuilder)
         
-        lineView.frame = lineViewRectForBounds(bounds, editing: editingOrSelected || _renderingInInterfaceBuilder)
+        //lineView.frame = lineViewRectForBounds(bounds, editing: editingOrSelected || _renderingInInterfaceBuilder)
     }
     
     /**
@@ -759,13 +708,13 @@ open class AMPFloatingTextField: UITextField { // swiftlint:disable:this type_bo
         guard let title = title ?? placeholder else {
             return nil
         }
-        return titleFormatter(title)
+        return title
     }
     
     fileprivate func selectedTitleOrTitlePlaceholder() -> String? {
         guard let title = selectedTitle ?? title ?? placeholder else {
             return nil
         }
-        return titleFormatter(title)
+        return title
     }
 } // swiftlint:disable:this file_length
