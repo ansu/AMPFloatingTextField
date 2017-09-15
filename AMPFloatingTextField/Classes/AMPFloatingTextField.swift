@@ -177,10 +177,6 @@ open class AMPFloatingTextField: UITextField { // swiftlint:disable:this type_bo
     /// The internal `UILabel` that displays the selected, deselected title or error message based on the current state.
     open var titleLabel: UILabel!
     
-    private var backgroundView: UIView!
-    
-    
-    
     open var errorLabel: UILabel!
     
     // MARK: Properties
@@ -328,7 +324,6 @@ open class AMPFloatingTextField: UITextField { // swiftlint:disable:this type_bo
         createTitleLabel()
         createLineView()
         createErrorLabel()
-        createTextFieldBackgroundView()
         layer.addSublayer(borderLayer)
         updateColors()
         addEditingChangedObserver()
@@ -361,28 +356,6 @@ open class AMPFloatingTextField: UITextField { // swiftlint:disable:this type_bo
     }
     
     // MARK: create components
-    
-    fileprivate func createTextFieldBackgroundView(){
-        
-        let superRect = self.bounds
-        
-        let titleHeight = self.titleHeight()
-        
-        
-        let rect = CGRect(
-            x: superRect.origin.x,
-            y: titleHeight,
-            width: superRect.size.width,
-            height: superRect.size.height - titleHeight * 2 - selectedLineHeight
-        )
-        
-        self.backgroundView = UIView(frame: rect)
-        self.backgroundView.backgroundColor = UIColor.lightGray
-        self.backgroundView.isUserInteractionEnabled = false
-        addSubview(backgroundView)
-        
-        self.sendSubview(toBack: backgroundView)
-    }
     
     fileprivate func createTitleLabel() {
         let titleLabel = UILabel()
