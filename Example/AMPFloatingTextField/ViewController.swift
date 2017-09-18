@@ -51,15 +51,14 @@ class ViewController: UIViewController, UITextFieldDelegate {
         
         textField.tintColor = overcastBlueColor
         
-        textField.textColor = darkGreyColor
-        textField.lineColor = UIColor.red
-        textField.activeBorderColor = UIColor.white
-        textField.activeBackgroundColor = UIColor.purple
-        
+        textField.textColor = .black
+        textField.errorColor = .red
+        textField.activeBackgroundColor = lightGreyColor
+        textField.inActiveBackgroundColor = lightGreyColor
+        textField.errorBackGroundColor = UIColor.red.withAlphaComponent(0.2)
         textField.placeholderColor = UIColor.white
-        
+        textField.lineColor = UIColor.red
         textField.selectedTitleColor = darkGreyColor
-        textField.selectedLineColor = UIColor.red
         
         // Set custom fonts for the title, placeholder and textfield labels
         textField.titleLabel.font = UIFont.systemFont(ofSize: 12)
@@ -75,6 +74,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
 extension ViewController {
     
     // MARK: - Delegate
+    
     
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         // Validate the email field
