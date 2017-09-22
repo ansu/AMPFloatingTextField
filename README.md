@@ -10,6 +10,10 @@ Version: 1.0
 
 And, we are not stopping here, many more customizations are on the way.
 
+# Credits
+
+AMPFloatingTextField is written and maintained by Ansu [@ansu](https://github.com/ansu), Mohit [@Mohit95](https://github.com/mohit95) and Pushpendra [@pushpendra65](https://github.com/pushpendra65)
+
 # AMPFloatingTextField
 
 [![CI Status](http://img.shields.io/travis/ansujain123/AMPFloatingTextField.svg?style=flat)](https://travis-ci.org/ansujain123/AMPFloatingTextField)
