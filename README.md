@@ -10,6 +10,9 @@ Currently it handles the below scneario:
 Version: 1.0
 
 
+# Credits
+
+AMPFloatingTextField is written and maintained by Ansu [@ansu](https://github.com/ansu), Mohit [@Mohit95](https://github.com/mohit95) and Pushpendra [@pushpendra65](https://github.com/pushpendra65)
 
 # AMPFloatingTextField
 
