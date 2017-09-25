@@ -12,6 +12,11 @@ import UIKit
  A beautiful textfield implementation with support for top title label, bottom error message and placeholder.
  */
 
+public protocol Rule {
+    var regex: String { get }
+    var message: String { get }
+}
+
 @IBDesignable
 open class AMPFloatingTextField: UITextField { // swiftlint:disable:this type_body_length
 
@@ -29,6 +34,11 @@ open class AMPFloatingTextField: UITextField { // swiftlint:disable:this type_bo
     // MARK: Colors
     fileprivate var cachedTextColor: UIColor?
     private let borderLayer = CALayer()
+    var rules: [Rule]?
+    fileprivate var isTextValid: Bool = false
+    fileprivate var cachedErrorMessage: String!
+    
+    open var isImmediateValidation: Bool = false
     
     // This property applies a thickness to the border of the control. The default value for this property is 2 points.
     @IBInspectable open var borderSize: CGFloat = 2.0 {
@@ -166,6 +176,8 @@ open class AMPFloatingTextField: UITextField { // swiftlint:disable:this type_bo
     open var titleLabel: UILabel!
     
     open var errorLabel: UILabel!
+    
+    open var tickView: UILabel!
     
     // MARK: Properties
     
@@ -312,6 +324,7 @@ open class AMPFloatingTextField: UITextField { // swiftlint:disable:this type_bo
         createTitleLabel()
         createLineView()
         createErrorLabel()
+        createTickLabel()
         layer.addSublayer(borderLayer)
         updateColors()
         addEditingChangedObserver()
@@ -321,12 +334,14 @@ open class AMPFloatingTextField: UITextField { // swiftlint:disable:this type_bo
     fileprivate func addEditingChangedObserver() {
         self.addTarget(self, action: #selector(AMPFloatingTextField.editingChanged), for: .editingChanged)
         self.addTarget(self, action: #selector(AMPFloatingTextField.editingBegin), for: .editingDidBegin)
+        self.addTarget(self, action: #selector(AMPFloatingTextField.editingEnd), for: .editingDidEnd)
     }
     
     open func editingBegin() {
         _titleVisible = true
         errorMessage = ""
         self.placeholder = ""
+        self.rightView?.isHidden = true
         updateTitleLabel(true)
         updateBorder()
         updateBackground()
@@ -335,6 +350,34 @@ open class AMPFloatingTextField: UITextField { // swiftlint:disable:this type_bo
     open func editingChanged() {
         updateControl(true)
         updateTitleLabel(true)
+    }
+    
+    func editingEnd() {
+        
+        if let nonOpRules = rules {
+            
+            for rule in nonOpRules {
+                let regEx = rule.regex
+                let regTest = NSPredicate(format: "SELF MATCHES %@", regEx)
+                let textResult = regTest.evaluate(with: self.text)
+                if textResult == false {
+                    isTextValid = false
+                    self.cachedErrorMessage = rule.message
+                    break
+                } else {
+                    isTextValid = true
+                }
+            }
+        } else {
+            self.isTextValid = true
+        }
+        
+        if isImmediateValidation {
+            updateControl(true)
+            if isTextValid {
+                self.rightView?.isHidden = false
+            }
+        }
     }
     
     // MARK: create components
@@ -371,6 +414,16 @@ open class AMPFloatingTextField: UITextField { // swiftlint:disable:this type_bo
         
         lineView.autoresizingMask = [.flexibleWidth, .flexibleTopMargin]
         addSubview(lineView)
+    }
+    
+    func createTickLabel() {
+        let tickLabel = UILabel.init(frame: CGRect(origin: .zero, size: CGSize(width: 15, height: 30)))
+        tickLabel.textColor = UIColor.green
+        tickLabel.font = UIFont.systemFont(ofSize: 12)
+        tickLabel.text = "✓"
+        self.rightView = tickLabel
+        self.rightViewMode = .unlessEditing
+        self.tickView = tickLabel
     }
     
     fileprivate func configureDefaultLineHeight() {
@@ -496,6 +549,17 @@ open class AMPFloatingTextField: UITextField { // swiftlint:disable:this type_bo
         
         updateErrorVisibility(animated)
         
+    }
+    
+    @discardableResult
+    open func validate() -> Bool {
+        
+        if isTextValid {
+            self.rightView?.isHidden = false
+        } else {
+            errorMessage = self.cachedErrorMessage
+        }
+        return isTextValid
     }
     
     fileprivate var _titleVisible: Bool = false
