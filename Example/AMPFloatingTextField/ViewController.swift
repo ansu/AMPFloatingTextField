@@ -63,19 +63,20 @@ class ViewController: UIViewController, UITextFieldDelegate {
         textField.titleLabel.font = UIFont.systemFont(ofSize: 12)
         textField.placeholderFont = UIFont.systemFont(ofSize: 18)
         textField.font = UIFont.systemFont(ofSize: 18)
+        textField.isImmediateValidation = true
     }
 }
 
 extension ViewController {
 
     // MARK: - Delegate
-
+    
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         // Validate the email field
         if textField == emailField {
             validateEmailField()
         }
-
+        
         // When pressing return, move to the next field
         let nextTag = textField.tag + 1
         if let nextResponder = textField.superview?.viewWithTag(nextTag) as UIResponder! {
@@ -85,17 +86,17 @@ extension ViewController {
         }
         return false
     }
-
+    
     @IBAction func validateEmailField() {
         validateEmailTextFieldWithText(email: emailField.text)
     }
-
+    
     func validateEmailTextFieldWithText(email: String?) {
         guard let email = email else {
             emailField.errorMessage = nil
             return
         }
-
+        
         if email.characters.isEmpty {
             emailField.errorMessage = nil
         } else if !validateEmail(email) {
@@ -108,15 +109,15 @@ extension ViewController {
             emailField.errorMessage = nil
         }
     }
-
+    
     // MARK: - validation
-
+    
     func validateEmail(_ candidate: String) -> Bool {
-
+        
         // NOTE: validating email addresses with regex is usually not the best idea.
         // This implementation is for demonstration purposes only and is not recommended for production use.
         // Regex source and more information here: http://emailregex.com
-
+        
         let emailRegex = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,64}"
         return NSPredicate(format: "SELF MATCHES %@", emailRegex).evaluate(with: candidate)
     }
