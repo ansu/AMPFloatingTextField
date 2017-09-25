@@ -1,15 +1,18 @@
 # AMPFloatingTextField
 
-We fell in love with the text inputs effects of SkyfloatingLableTextField. We got the completly different scenario in our project which we were not able to handled through that. As an exercise We decided to recreate couple of textfield features.
+When we first used SkyFloatingLabelTextField, instantly we fell in love with its effects. Then we got a completely different scenario which could not be handled with it, hence, decided to create something of our own.
 
-
-Currently it handles the below scneario:
+Hope you'll like it :)
 
 ![AMPFloatingTextField](https://github.com/ansu/AMPFloatingTextField/blob/master/screenshot/titlewithbottomerrorlable.png)
 
 Version: 1.0
 
+And, we are not stopping here, many more customizations are on the way.
 
+# Credits
+
+AMPFloatingTextField is written and maintained by Ansu [@ansu](https://github.com/ansu), Mohit [@Mohit95](https://github.com/mohit95) and Pushpendra [@pushpendra65](https://github.com/pushpendra65)
 
 # AMPFloatingTextField
 
@@ -20,7 +23,7 @@ Version: 1.0
 
 ## Example
 
-To run the example project, clone the repo, and run `pod install` from the Example directory first.
+To run the example project, clone the repo and run `pod install` from the Example directory first.
 
 ## Requirements
 
